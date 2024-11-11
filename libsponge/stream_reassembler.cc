@@ -28,6 +28,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         return;
     }
     auto end_index = data.size() + index;
+
     // 新数据在后面
     if (index >= _next_index) {
         auto astart = index - _next_index;
