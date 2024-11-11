@@ -16,6 +16,11 @@
 class ByteStream {
   private:
     // Your code here -- add private members as necessary.
+    size_t _capacity;            // 缓冲区最大容量
+    std::deque<char> _buffer{};  // 双端队列存储字符数据
+    size_t _bytes_written{0};    // 记录写入缓冲区的总字节数
+    size_t _bytes_read{0};       // 记录从缓冲区读取的总字节数
+    bool _is_input_end{false};   // 表示输入流是否已结束
 
     bool _error{};  //!< Flag indicating that the stream suffered an error.
 
