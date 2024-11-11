@@ -12,38 +12,49 @@
 // You will need to add private members to the class declaration in `byte_stream.hh`
 
 template <typename... Targs>
-void DUMMY_CODE(Targs &&... /* unused */) {}
+void DUMMY_CODE(Targs &&.../* unused */) {}
 
 using namespace std;
 
-ByteStream::ByteStream(const size_t capacity) { DUMMY_CODE(capacity); }
+ByteStream::ByteStream(const size_t capacity) : _capacity(capacity) {}
 
 size_t ByteStream::write(const string &data) {
-    DUMMY_CODE(data);
-    return {};
+    size_t ws = min(data.size(), remaining_capacity());  // 实际字节数为data.size与缓冲区剩余容量的最小值
+    for (size_t i = 0; i < ws; ++i) {
+        _buffer.push_back(data[i]);
+    }
+    _bytes_written += ws;
+    return ws;
 }
 
 //! \param[in] len bytes will be copied from the output side of the buffer
+// 计算实际读取字节数rs，返回从_buffer.begin()起始位置开始的rs个字节的字符串，但不会从缓冲区移除数据。
 string ByteStream::peek_output(const size_t len) const {
-    DUMMY_CODE(len);
-    return {};
+    auto rs = min(buffer_size(), len);
+    return {_buffer.begin(), _buffer.begin() + rs};
 }
 
 //! \param[in] len bytes will be removed from the output side of the buffer
-void ByteStream::pop_output(const size_t len) { DUMMY_CODE(len); }
+void ByteStream::pop_output(const size_t len) {
+    auto rs = min(len, buffer_size());
+    _bytes_read += rs;
+    for (size_t i = 0; i < rs; ++i) {
+        _buffer.pop_front();
+    }
+}
 
-void ByteStream::end_input() {}
+void ByteStream::end_input() { _is_input_end = true; }
 
-bool ByteStream::input_ended() const { return {}; }
+bool ByteStream::input_ended() const { return _is_input_end; }
 
-size_t ByteStream::buffer_size() const { return {}; }
+size_t ByteStream::buffer_size() const { return _buffer.size(); }
 
-bool ByteStream::buffer_empty() const { return {}; }
+bool ByteStream::buffer_empty() const { return _buffer.empty(); }
 
-bool ByteStream::eof() const { return false; }
+bool ByteStream::eof() const { return buffer_empty() && input_ended(); }
 
-size_t ByteStream::bytes_written() const { return {}; }
+size_t ByteStream::bytes_written() const { return _bytes_written; }
 
-size_t ByteStream::bytes_read() const { return {}; }
+size_t ByteStream::bytes_read() const { return _bytes_read; }
 
-size_t ByteStream::remaining_capacity() const { return {}; }
+size_t ByteStream::remaining_capacity() const { return _capacity - buffer_size(); }

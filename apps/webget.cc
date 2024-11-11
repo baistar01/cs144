@@ -7,18 +7,27 @@
 using namespace std;
 
 void get_URL(const string &host, const string &path) {
-    // Your code here.
+    TCPSocket socket;
 
-    // You will need to connect to the "http" service on
-    // the computer whose name is in the "host" string,
-    // then request the URL path given in the "path" string.
+    // 连接到web服务器
+    socket.connect(Address(host, "http"));
 
-    // Then you'll need to print out everything the server sends back,
-    // (not just one call to read() -- everything) until you reach
-    // the "eof" (end of file).
+    // 创建请求报文，包含 Host 和 Connection 头
+    socket.write("GET " + path + " HTTP/1.1\r\n");
+    socket.write("Host: " + host + "\r\n");
+    socket.write("Connection: close\r\n");           // 关闭连接，避免保持长连接
+    socket.write("User-Agent: webget/1.0\r\n\r\n");  // 加上 User-Agent
 
-    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
-    cerr << "Warning: get_URL() has not been implemented yet.\n";
+    // 结束写操作
+    socket.shutdown(SHUT_WR);
+
+    // 读取响应报文
+    while (!socket.eof()) {
+        cout << socket.read();
+    }
+
+    // 关闭socket(可以不用手动关闭，socket对象被析构时会自动调用FDWrapper.close()释放文件描述符)
+    socket.close();
 }
 
 int main(int argc, char *argv[]) {
