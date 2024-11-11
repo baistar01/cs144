@@ -11,9 +11,17 @@
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
+    ByteStream _output;                   //!< The reassembled in-order byte stream
+    size_t _capacity;                     //!< The maximum number of bytes
+    std::deque<char> _unassembles{};      // 双端队列，代表first unassembled到first unacceptable之间的数据
+    std::deque<bool> _unassemble_mask{};  // 用一个mask指出哪些数据有效但是没有重组
+    size_t _unassambled_bytes{0};         // 代表first unassembled索引
+    uint64_t _next_index{0};
+    bool _is_eof{false};
 
-    ByteStream _output;  //!< The reassembled in-order byte stream
-    size_t _capacity;    //!< The maximum number of bytes
+    void write_unassamble(const std::string &data, size_t dstart, size_t len, size_t astart);
+
+    void assemble();  // 重组数据
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
